@@ -11,7 +11,7 @@ import (
 func APIUpdateMerge(schema *types.Schema, schemas *types.Schemas, dest, src map[string]interface{}, replace bool) map[string]interface{} {
 	result := UpdateMerge(schema, schemas, dest, src, replace)
 	if s, ok := dest["status"]; ok {
-		result["status"] = s
+		result["status"] = mergeStatus(convert.ToMapInterface(s), convert.ToMapInterface(src["status"]))
 	}
 	if m, ok := dest["metadata"]; ok {
 		result["metadata"] = mergeMetadata(convert.ToMapInterface(m), convert.ToMapInterface(src["metadata"]))
@@ -55,6 +55,16 @@ func mergeProtected(dest, src map[string]interface{}) map[string]interface{} {
 		if _, ok := src[k]; !ok {
 			delete(result, k)
 		}
+	}
+
+	return result
+}
+
+func mergeStatus(dest map[string]interface{}, src map[string]interface{}) map[string]interface{} {
+	result := copyMap(dest)
+
+	for k, v := range src {
+		result[k] = v
 	}
 
 	return result
